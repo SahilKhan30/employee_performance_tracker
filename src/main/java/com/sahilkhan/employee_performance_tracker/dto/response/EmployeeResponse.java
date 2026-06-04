@@ -16,4 +16,5 @@ public class EmployeeResponse {
     private String department;
     private String role;
     private LocalDate joiningDate;
+    private Double averageRating;
 }

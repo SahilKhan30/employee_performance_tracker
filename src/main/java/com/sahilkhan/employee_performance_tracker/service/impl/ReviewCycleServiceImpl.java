@@ -42,7 +42,7 @@ public class ReviewCycleServiceImpl implements ReviewCycleService {
         Long internalId = cycle.getId();
 
         Double avgRating = performanceReviewRepository.getAverageRatingForCycle(internalId);
-        avgRating = avgRating != null ? avgRating : 0.0;
+        avgRating = avgRating != null ? Math.round(avgRating * 100.0) / 100.0 : 0.0;
 
         List<Long> topPerformerIds = performanceReviewRepository.findTopPerformerEmployeeIds(internalId, PageRequest.of(0, 1));
         EmployeeResponse topPerformer = null;

@@ -9,15 +9,21 @@ public final class EmployeeMapper {
     private EmployeeMapper() {}
 
     public static EmployeeResponse toResponse(Employee employee) {
+        return toResponse(employee, null);
+    }
+
+    public static EmployeeResponse toResponse(Employee employee, Double averageRating) {
         if (employee == null) {
             return null;
         }
+        averageRating = averageRating != null ? Math.round(averageRating * 100.0) / 100.0 : 0.0;
         return EmployeeResponse.builder()
                 .id(employee.getUuid())
                 .name(employee.getName())
                 .department(employee.getDepartment())
                 .role(employee.getRole())
                 .joiningDate(employee.getJoiningDate())
+                .averageRating(averageRating)
                 .build();
     }
 

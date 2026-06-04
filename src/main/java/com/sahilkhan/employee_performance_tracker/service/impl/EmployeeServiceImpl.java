@@ -5,6 +5,7 @@ import com.sahilkhan.employee_performance_tracker.dto.response.EmployeeResponse;
 import com.sahilkhan.employee_performance_tracker.entity.Employee;
 import com.sahilkhan.employee_performance_tracker.exception.ResourceNotFoundException;
 import com.sahilkhan.employee_performance_tracker.repository.EmployeeRepository;
+import com.sahilkhan.employee_performance_tracker.repository.EmployeeWithRating;
 import com.sahilkhan.employee_performance_tracker.service.EmployeeService;
 import com.sahilkhan.employee_performance_tracker.utils.EmployeeMapper;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +33,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional(readOnly = true)
     public List<EmployeeResponse> filterEmployees(String department, Double minRating) {
-        List<Employee> employees = employeeRepository.filterEmployees(department, minRating);
-        return employees.stream()
-                .map(EmployeeMapper::toResponse)
+        List<EmployeeWithRating> results = employeeRepository.filterEmployees(department, minRating);
+        return results.stream()
+                .map(result -> EmployeeMapper.toResponse(result.getEmployee(), result.getAverageRating()))
                 .collect(Collectors.toList());
     }
 

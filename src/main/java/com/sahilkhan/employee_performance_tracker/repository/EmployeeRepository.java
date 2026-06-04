@@ -15,10 +15,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Optional<Employee> findByUuid(UUID uuid);
 
-    @Query("SELECT e FROM Employee e " +
+    @Query("SELECT e AS employee, COALESCE(AVG(r.rating), 0.0) AS averageRating FROM Employee e " +
            "LEFT JOIN PerformanceReview r ON r.employee = e " +
            "WHERE (:department IS NULL OR LOWER(e.department) = LOWER(CAST(:department AS string))) " +
            "GROUP BY e " +
            "HAVING (:minRating IS NULL OR COALESCE(AVG(r.rating), 0.0) >= :minRating)")
-    List<Employee> filterEmployees(@Param("department") String department, @Param("minRating") Double minRating);
+    List<EmployeeWithRating> filterEmployees(@Param("department") String department, @Param("minRating") Double minRating);
 }

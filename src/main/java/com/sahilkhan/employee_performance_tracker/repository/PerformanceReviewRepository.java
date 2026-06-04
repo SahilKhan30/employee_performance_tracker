@@ -18,7 +18,7 @@ public interface PerformanceReviewRepository extends JpaRepository<PerformanceRe
     @Query("SELECT r.employee.id FROM PerformanceReview r " +
            "WHERE r.reviewCycle.id = :cycleId " +
            "GROUP BY r.employee.id " +
-           "ORDER BY AVG(r.rating) DESC, COUNT(r) DESC, r.employee.id ASC")
+           "ORDER BY AVG(r.rating) DESC, COUNT(r) DESC, MIN(r.employee.joiningDate) ASC")
     List<Long> findTopPerformerEmployeeIds(@Param("cycleId") Long cycleId, Pageable pageable);
 
     @Query("SELECT AVG(r.rating) FROM PerformanceReview r WHERE r.reviewCycle.id = :cycleId")
