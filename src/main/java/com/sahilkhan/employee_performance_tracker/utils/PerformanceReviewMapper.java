@@ -31,7 +31,7 @@ public final class PerformanceReviewMapper {
         review.setEmployee(employee);
         review.setReviewCycle(cycle);
         review.setRating(request.rating());
-        review.setReviewerNotes(request.reviewerNotes());
+        review.setReviewerNotes(request.reviewerNotes() != null ? request.reviewerNotes().trim() : null);
         return review;
     }
 }

@@ -15,12 +15,14 @@ public interface PerformanceReviewRepository extends JpaRepository<PerformanceRe
     @Query("SELECT r FROM PerformanceReview r JOIN FETCH r.reviewCycle WHERE r.employee.id = :employeeId")
     List<PerformanceReview> findByEmployeeIdWithCycle(@Param("employeeId") Long employeeId);
 
-    @Query("SELECT r.employee.id FROM PerformanceReview r " +
+    @Query("SELECT r.employee AS employee, AVG(r.rating) AS averageRating FROM PerformanceReview r " +
            "WHERE r.reviewCycle.id = :cycleId " +
-           "GROUP BY r.employee.id " +
-           "ORDER BY AVG(r.rating) DESC, COUNT(r) DESC, MIN(r.employee.joiningDate) ASC")
-    List<Long> findTopPerformerEmployeeIds(@Param("cycleId") Long cycleId, Pageable pageable);
+           "GROUP BY r.employee " +
+           "ORDER BY AVG(r.rating) DESC, MIN(r.employee.joiningDate) ASC")
+    List<EmployeeWithRating> findTopPerformer(@Param("cycleId") Long cycleId, Pageable pageable);
 
     @Query("SELECT AVG(r.rating) FROM PerformanceReview r WHERE r.reviewCycle.id = :cycleId")
     Double getAverageRatingForCycle(@Param("cycleId") Long cycleId);
+
+    boolean existsByEmployeeIdAndReviewCycleId(Long employeeId, Long reviewCycleId);
 }

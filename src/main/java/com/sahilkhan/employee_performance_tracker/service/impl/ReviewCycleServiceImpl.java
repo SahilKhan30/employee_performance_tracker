@@ -4,7 +4,6 @@ import com.sahilkhan.employee_performance_tracker.dto.request.ReviewCycleRequest
 import com.sahilkhan.employee_performance_tracker.dto.response.ReviewCycleSummaryResponse;
 import com.sahilkhan.employee_performance_tracker.dto.response.EmployeeResponse;
 import com.sahilkhan.employee_performance_tracker.dto.response.ReviewCycleResponse;
-import com.sahilkhan.employee_performance_tracker.entity.Employee;
 import com.sahilkhan.employee_performance_tracker.entity.ReviewCycle;
 import com.sahilkhan.employee_performance_tracker.enums.GoalStatus;
 import com.sahilkhan.employee_performance_tracker.exception.BadRequestException;
@@ -12,7 +11,7 @@ import com.sahilkhan.employee_performance_tracker.exception.ResourceNotFoundExce
 import com.sahilkhan.employee_performance_tracker.repository.GoalRepository;
 import com.sahilkhan.employee_performance_tracker.repository.PerformanceReviewRepository;
 import com.sahilkhan.employee_performance_tracker.repository.ReviewCycleRepository;
-import com.sahilkhan.employee_performance_tracker.service.EmployeeService;
+import com.sahilkhan.employee_performance_tracker.repository.EmployeeWithRating;
 import com.sahilkhan.employee_performance_tracker.service.ReviewCycleService;
 import com.sahilkhan.employee_performance_tracker.utils.EmployeeMapper;
 import com.sahilkhan.employee_performance_tracker.utils.ReviewCycleMapper;
@@ -31,7 +30,6 @@ public class ReviewCycleServiceImpl implements ReviewCycleService {
     private final ReviewCycleRepository reviewCycleRepository;
     private final PerformanceReviewRepository performanceReviewRepository;
     private final GoalRepository goalRepository;
-    private final EmployeeService employeeService;
 
     @Override
     @Transactional(readOnly = true)
@@ -44,11 +42,11 @@ public class ReviewCycleServiceImpl implements ReviewCycleService {
         Double avgRating = performanceReviewRepository.getAverageRatingForCycle(internalId);
         avgRating = avgRating != null ? Math.round(avgRating * 100.0) / 100.0 : 0.0;
 
-        List<Long> topPerformerIds = performanceReviewRepository.findTopPerformerEmployeeIds(internalId, PageRequest.of(0, 1));
+        List<EmployeeWithRating> topPerformers = performanceReviewRepository.findTopPerformer(internalId, PageRequest.of(0, 1));
         EmployeeResponse topPerformer = null;
-        if (!topPerformerIds.isEmpty()) {
-            Employee employee = employeeService.getEmployeeById(topPerformerIds.get(0));
-            topPerformer = EmployeeMapper.toResponse(employee);
+        if (!topPerformers.isEmpty()) {
+            EmployeeWithRating projection = topPerformers.get(0);
+            topPerformer = EmployeeMapper.toResponse(projection.getEmployee(), projection.getAverageRating());
         }
 
         long completedGoals = goalRepository.countByReviewCycleIdAndStatus(internalId, GoalStatus.COMPLETED);
@@ -68,10 +66,11 @@ public class ReviewCycleServiceImpl implements ReviewCycleService {
         if (request.endDate().isBefore(request.startDate())) {
             throw new BadRequestException("End date cannot be before start date");
         }
-        if (reviewCycleRepository.existsByName(request.name())) {
-            throw new BadRequestException("Review cycle with name '" + request.name() + "' already exists");
+        String trimmedName = request.name() != null ? request.name().trim() : null;
+        if (reviewCycleRepository.existsByName(trimmedName)) {
+            throw new BadRequestException("Review cycle with name '" + trimmedName + "' already exists");
         }
-        ReviewCycle cycle = ReviewCycleMapper.toCreateEntity(request.name(), request.startDate(), request.endDate());
+        ReviewCycle cycle = ReviewCycleMapper.toCreateEntity(request);
         ReviewCycle saved = reviewCycleRepository.save(cycle);
         return ReviewCycleMapper.toResponse(saved);
     }

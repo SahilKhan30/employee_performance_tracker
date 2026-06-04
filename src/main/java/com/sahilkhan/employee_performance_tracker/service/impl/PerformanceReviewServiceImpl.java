@@ -5,6 +5,7 @@ import com.sahilkhan.employee_performance_tracker.dto.response.PerformanceReview
 import com.sahilkhan.employee_performance_tracker.entity.Employee;
 import com.sahilkhan.employee_performance_tracker.entity.PerformanceReview;
 import com.sahilkhan.employee_performance_tracker.entity.ReviewCycle;
+import com.sahilkhan.employee_performance_tracker.exception.BadRequestException;
 import com.sahilkhan.employee_performance_tracker.exception.ResourceNotFoundException;
 import com.sahilkhan.employee_performance_tracker.repository.PerformanceReviewRepository;
 import com.sahilkhan.employee_performance_tracker.repository.ReviewCycleRepository;
@@ -33,6 +34,10 @@ public class PerformanceReviewServiceImpl implements PerformanceReviewService {
         Employee employee = employeeService.getEmployeeByUuid(request.employeeId());
         ReviewCycle cycle = reviewCycleRepository.findByUuid(request.reviewCycleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Review cycle not found with id: " + request.reviewCycleId()));
+
+        if (performanceReviewRepository.existsByEmployeeIdAndReviewCycleId(employee.getId(), cycle.getId())) {
+            throw new BadRequestException("Employee has already been reviewed in this review cycle");
+        }
 
         PerformanceReview review = PerformanceReviewMapper.toCreateEntity(request, employee, cycle);
 

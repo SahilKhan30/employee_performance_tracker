@@ -32,9 +32,9 @@ public final class EmployeeMapper {
             return null;
         }
         Employee employee = new Employee();
-        employee.setName(request.name());
-        employee.setDepartment(request.department());
-        employee.setRole(request.role());
+        employee.setName(request.name().trim());
+        employee.setDepartment(request.department().trim());
+        employee.setRole(request.role().trim());
         employee.setJoiningDate(request.joiningDate());
         return employee;
     }

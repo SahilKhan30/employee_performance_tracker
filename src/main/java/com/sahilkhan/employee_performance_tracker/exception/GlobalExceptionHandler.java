@@ -1,6 +1,9 @@
 package com.sahilkhan.employee_performance_tracker.exception;
 
 import com.sahilkhan.employee_performance_tracker.dto.response.ErrorResponse;
+
+import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -56,6 +59,17 @@ public class GlobalExceptionHandler {
                 "Validation failed",
                 getRequestPath(request),
                 errors
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
+        ErrorResponse body = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                getRequestPath(request)
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }

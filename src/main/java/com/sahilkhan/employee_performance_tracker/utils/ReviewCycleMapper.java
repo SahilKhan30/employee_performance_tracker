@@ -1,5 +1,6 @@
 package com.sahilkhan.employee_performance_tracker.utils;
 
+import com.sahilkhan.employee_performance_tracker.dto.request.ReviewCycleRequest;
 import com.sahilkhan.employee_performance_tracker.dto.response.ReviewCycleResponse;
 import com.sahilkhan.employee_performance_tracker.entity.ReviewCycle;
 
@@ -19,11 +20,11 @@ public final class ReviewCycleMapper {
                 .build();
     }
 
-    public static ReviewCycle toCreateEntity(String name, java.time.LocalDate startDate, java.time.LocalDate endDate) {
+    public static ReviewCycle toCreateEntity(ReviewCycleRequest request) {
         ReviewCycle cycle = new ReviewCycle();
-        cycle.setName(name);
-        cycle.setStartDate(startDate);
-        cycle.setEndDate(endDate);
+        cycle.setName(request.name().trim());
+        cycle.setStartDate(request.startDate());
+        cycle.setEndDate(request.endDate());
         return cycle;
     }
 }

@@ -33,7 +33,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional(readOnly = true)
     public List<EmployeeResponse> filterEmployees(String department, Double minRating) {
-        List<EmployeeWithRating> results = employeeRepository.filterEmployees(department, minRating);
+        String normalizedDept = (department != null && !department.isBlank()) ? department.trim() : null;
+        List<EmployeeWithRating> results = employeeRepository.filterEmployees(normalizedDept, minRating);
         return results.stream()
                 .map(result -> EmployeeMapper.toResponse(result.getEmployee(), result.getAverageRating()))
                 .collect(Collectors.toList());
